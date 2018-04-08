@@ -1,0 +1,33 @@
+version: '3'
+services:
+  nodeBack:
+    image: node-back
+    container_name: nodeBack
+    ports:
+      - "3050:3000"
+      - "3051:3001"
+      - "9229:9229"
+    tty: true
+    volumes:
+      - ../apiNodeBackend:/usr/src
+    links:
+     - db:database
+  db:
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+    - 8080:8080
+  reactFront:
+    image: react-front
+    container_name: reactFront
+    ports:
+      - "3020:3000"
+      - "9220:9229"
+    volumes:
+      - ../shared-server-ui:/usr/src  

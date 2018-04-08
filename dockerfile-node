@@ -1,0 +1,20 @@
+# latest official node image
+FROM node:8.9.0
+
+MAINTAINER Nicolas Araya <naraya@cys.com.ar>
+
+# use nodemon for development
+# RUN npm config set proxy http://10.1.1.25:8080/
+# RUN npm config set https-proxy http://10.1.1.25:8080/
+
+RUN npm install --verbose  --global nodemon
+RUN npm install --verbose --global sequelize sequelize-cli pg
+RUN mkdir -p /usr/src
+
+WORKDIR /usr/src
+
+EXPOSE 3000
+EXPOSE 3001
+EXPOSE 9229 
+
+CMD [ "npm","run", "start-dock" ]
