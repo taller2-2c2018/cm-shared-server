@@ -15,12 +15,12 @@ services:
   db:
     container_name: postgres
     image: postgres
-    restart: always
+    restart: "no"
     environment:
       POSTGRES_PASSWORD: example
   adminer:
     image: adminer
-    restart: always
+    restart: "no"
     ports:
     - 8080:8080
   reactFront:
