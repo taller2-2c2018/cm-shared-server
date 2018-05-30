@@ -11,5 +11,10 @@ RUN rm -rf /var/cache/apk/*
 RUN pip install gunicorn
 
 ENV FLASK_APP=run.py
+ENV SHARED_SERVER_HOST=http://sharedserver:3000/v0/api
+ENV SERVER_USER=nledesma@taller.com.ar
+ENV SERVER_PASSWORD=nledesma
+ENV REDIS_HOST=
+ENV MONGO_URL=mongodb://database:27017/applicationServerDB
 
 EXPOSE 5000
