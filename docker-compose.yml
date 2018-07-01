@@ -9,7 +9,7 @@ services:
       - "9229:9229"
     tty: true
     volumes:
-      - ../apiNodeBackend:/usr/src
+      - ../ApiNodeBackend:/usr/src
     links:
      - db:database
   db:
@@ -30,4 +30,21 @@ services:
       - "3020:3000"
       - "9220:9229"
     volumes:
-      - ../shared-server-ui:/usr/src  
+      - ../shared-server-ui:/usr/src
+  pythonServer:
+    image: python-server
+    container_name: pythonServer
+    command: sh docker-run.sh
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../applicationServer:/usr/src
+    links:
+      - mongodb:database
+      - redis
+      - nodeBack:sharedserver
+  mongodb:
+    image: mongo:latest
+  redis:
+    image: redis      

@@ -1,9 +1,61 @@
-# Levantar el proyecto utilizando docker
+# TL;DR Instrucciones de instalación
+
+## Requerimientos:
+- docker
+- docker-compose apto para versión 3
+
+## 1. Buildear las imágenes
+
+#### Flask:
+`
+$ docker build --rm --no-cache -t python-server -f dockerfile-flask . 
+`
+#### Node:
+`
+$ docker build --rm --no-cache -t node-back -f dockerfile-node . 
+`
+#### React:
+`
+$ docker build --rm --no-cache -t react-front -f dockerfile-react . 
+`
+
+## 2. Asegurarse de respectar la siguiente estructura de archivos:
+
+```
+../
+├── cm-shared-server/
+│   ├── docker-compose.yml
+│   ├── dockerfile-node
+│   ├── dockerfile-react
+│   └── Readme.md (USTED ESTÁ AQUÍ :P)
+├── shared-sever-ui/
+│   ├── package.json
+|   └── [...] (todo lo demás)
+└── ApiNodeBackend/
+|   ├── package.json
+|   └── [...] (todo lo demás)
+└── applicationServer/
+    ├── requirements.txt
+    └── [...] (todo lo demás)
+```
+
+## 3. Correr docker-compose
+
+`
+$ docker-compose up
+`
+
+Para conectarse remoto a cada container con el application server, shared server o backoffice de react, ver más abajo en la descripción de cada container.
+
+# Descripción
 
 El proyecto consta de las siguientes partes:
+  - Application Server Flask
   - Backend Node.js
   - Frontend React.js 
   - Base de datos postgres
+  - Base de datos mongodb
+  - Base de datos redis
 
 Todas las partes son levantadas en conjunto utilizando docker-compose. A continuación se explica cómo se configuran.
 
@@ -23,18 +75,18 @@ services:
       - "9229:9229"
     tty: true
     volumes:
-      - ../apiNodeBackend:/usr/src
+      - ../ApiNodeBackend:/usr/src
     links:
      - db:database
   db:
     container_name: postgres
     image: postgres
-    restart: always
+    restart: "no"
     environment:
       POSTGRES_PASSWORD: example
   adminer:
     image: adminer
-    restart: always
+    restart: "no"
     ports:
     - 8080:8080
   reactFront:
@@ -44,24 +96,24 @@ services:
       - "3020:3000"
       - "9220:9229"
     volumes:
-      - ../shared-server-ui:/usr/src  
+      - ../shared-server-ui:/usr/src
+  pythonServer:
+    image: python-server
+    container_name: pythonServer
+    command: sh docker-run.sh
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../applicationServer:/usr/src
+    links:
+      - mongodb:database
+      - redis
+      - nodeBack:sharedserver
+  mongodb:
+    image: mongo:latest
+  redis:
+    image: redis      
 
-```
-
-La estructura de carpetas que usa esta configuración es la siguiente:
-```
-../
-├── cm-shared-server/
-│   ├── docker-compose.yml
-│   ├── dockerfile-node
-│   ├── dockerfile-react
-│   └── Readme.md (USTED ESTÁ AQUÍ :P)
-├── shared-sever-ui/
-│   ├── package.json
-|   └── [...] (todo lo demás)
-└── apiNodeBackend/
-    ├── package.json
-    └── [...] (todo lo demás)
 ```
 
 ## BD
@@ -155,4 +207,35 @@ Por defecto la app corre en el puerto 3000 del contenedor, para utilizarla obvia
 Para conectarse al contenedor y disponer de una consola se debe ejecutar el siguiente comando:
 ```sh
 $ docker exec -ti reactFront /bin/bash
+```
+
+## Application server flask
+
+
+Para levantar el backend se utiliza un contenedor basado en la imagen representada por el archivo *dockerfile-flask*.
+
+Está basado en la imagen python3-alpine y sobre eso realiza configuraciones de región, e instala gunicorn.
+
+Crea además un directorio /usr/src en el cual al momento de levantar el contenedor debe apuntar al codigo fuente.
+
+Entonces se debe construir esta imagen utilizando un comando como por ejemplo:
+```sh
+$ docker build --rm --no-cache -t python-server -f dockerfile-flask . 
+```
+
+Con lo anterior se creará una imagen llamada **python-server**.
+
+En el docker-compose entonces tenemos que utilizar esta imagen. A su vez, esta imagen se conecta con los contenedores de mongodb y redis.
+
+Al levantar el contenedor se ejecutaran los comandos:
+```sh
+$ pip install -r requirements.txt
+$ cd src/
+$ flask run
+```
+La app corre en el puerto 5000.
+
+Para conectarse al contenedor y disponer de una consola se debe ejecutar el siguiente comando:
+```sh
+$ docker exec -ti pythonServer /bin/sh
 ```
