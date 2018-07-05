@@ -19,7 +19,7 @@ $ docker build --rm --no-cache -t node-back -f dockerfile-node .
 $ docker build --rm --no-cache -t react-front -f dockerfile-react . 
 `
 
-## 2. Asegurarse de respectar la siguiente estructura de archivos:
+## 2. Asegurarse de respetar la siguiente estructura de archivos:
 
 ```
 ../
